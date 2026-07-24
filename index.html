@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昭月大酒店</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+    <style>
+        :root {
+            --bg: #faf8f5;
+            --card-bg: #ffffff;
+            --text: #2c2416;
+            --text-light: #6b5e4a;
+            --gold: #b8944b;
+            --gold-dark: #8b6d35;
+            --border: #e0d8cc;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-hover: 0 6px 24px rgba(0,0,0,0.12);
+            --navy: #1c2838;
+            --overlay-bg: rgba(0,0,0,0.7);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+            line-height: 1.6;
+        }
+        .top-bar {
+            background: var(--navy);
+            color: #c4b998;
+            font-size: 12px;
+            text-align: center;
+            padding: 6px 16px;
+            letter-spacing: 1px;
+        }
+        .top-bar span { margin: 0 12px; }
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 64px;
+        }
+        .logo {
+            font-family: 'STSong','SimSun','PMingLiU','Noto Serif SC', serif;
+            font-size: 22px;
+            letter-spacing: 3px;
+            color: var(--navy);
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .logo .moon { color: var(--gold); font-size: 24px; margin-right: 2px; }
+        .nav-links { display: flex; list-style: none; gap: 20px; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+            padding: 8px 4px;
+            cursor: pointer;
+            font-family: 'STSong','SimSun', serif;
+        }
+        .nav-links a:hover { color: var(--gold-dark); }
+        .nav-links a.active { color: var(--gold-dark); border-bottom: 2px solid var(--gold); }
+        .btn-book {
+            background: var(--gold);
+            color: #fff !important;
+            padding: 8px 20px !important;
+            border-radius: 3px;
+            font-size: 13px !important;
+            letter-spacing: 2px;
+            transition: background 0.25s;
+        }
+        .btn-book:hover { background: var(--gold-dark); }
+
+        .page-section { display: none; max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+        .page-section.active { display: block; }
+
+        .hero-img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .hall-img, .room-img {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+        .hall-img-real, .room-img-real {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .section-title {
+            font-family: 'STSong', serif;
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: var(--navy);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+            font-family: 'STSong', serif;
+        }
+        .section-divider { width: 50px; height: 2px; background: var(--gold); margin: 0 auto 30px; }
+
+        .hall-grid, .room-grid, .dining-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+        .hall-card, .room-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+        .hall-card:hover, .room-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+        .hall-info, .room-info { padding: 18px 16px; }
+        .hall-name, .room-name {
+            font-family: 'STSong', serif;
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+        .hall-capacity { font-size: 12px; color: var(--text-light); margin-bottom: 8px; font-family: 'STSong', serif; }
+        .hall-status {
+            display: inline-block;
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-family: 'STSong', serif;
+        }
+        .status-available { background: #eaf5ea; color: #3a7a3a; border: 1px solid #c8e0c8; }
+        .status-booked { background: #fdf2f2; color: #8b1a1a; border: 1px solid #e8c8c8; }
+        .hall-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 7px 18px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: 'STSong', serif;
+        }
+        .btn-available { background: var(--gold); color: #fff; border: none; }
+        .btn-available:hover { background: var(--gold-dark); }
+        .btn-disabled { background: #e8e2d8; color: #b0a590; border: none; cursor: pointer; }
+
+        .hall-card.special-hall { border-color: #d5c8b8; background: #fdfaf7; }
+        .hall-card.special-hall .hall-img { background: #e8ddd0; }
+        .hall-card.special-hall .hall-name { color: #5c3a3a; }
+        .hall-card.special-hall:hover { border-color: #c4a8a0; box-shadow: 0 6px 24px rgba(120,30,30,0.08); }
+        .hall-status-extra { font-size: 10px; color: #8b6b6b; letter-spacing: 1px; margin-top: 4px; font-style: italic; font-family: 'STSong', serif; }
+
+        #about .about-block {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+            font-size: 12px;
+            color: #000000;
+            letter-spacing: 0.5px;
+            line-height: 2;
+            font-family: 'STSong', 'SimSun', serif;
+            user-select: none;
+            cursor: default;
+        }
+        #about .about-block p { margin-bottom: 14px; color: #000000; }
+        #about .about-block .highlight { color: #000000; font-weight: normal; }
+        #about .about-block .revision { text-align: right; font-size: 11px; color: #333333; margin-top: 20px; }
+
+        #contact .contact-block {
+            text-align: center;
+            font-size: 13px;
+            color: #000000;
+            letter-spacing: 1px;
+            line-height: 2.2;
+            font-family: 'STSong', 'SimSun', serif;
+        }
+        #contact .contact-block p { color: #000000; }
+
+        .book-form {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-align: left;
+            font-family: 'STSong', serif;
+        }
+        .book-form label { display: block; margin-bottom: 4px; font-size: 13px; color: var(--text); }
+        .book-form input, .book-form textarea, .book-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .book-form button {
+            width: 100%;
+            padding: 12px;
+            background: var(--gold);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-size: 15px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            font-family: 'STSong', serif;
+        }
+        .book-form button:hover { background: var(--gold-dark); }
+        .book-message {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #3a7a3a;
+            font-family: 'STSong', serif;
+            letter-spacing: 1px;
+        }
+
+        .invitation-notice {
+            text-align: center;
+            margin: 20px 0 10px;
+            padding: 12px;
+            background: #fdf9f5;
+            border: 1px dashed #c4b998;
+            font-size: 13px;
+            color: #5c3a3a;
+            letter-spacing: 1px;
+        }
+        .btn-get-invite {
+            display: inline-block;
+            margin: 10px auto;
+            padding: 10px 28px;
+            background: #8b1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            font-size: 14px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            font-family: 'STSong', serif;
+            transition: background 0.25s;
+        }
+        .btn-get-invite:hover { background: #a02020; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--overlay-bg);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: #fdfaf7;
+            border: 1px solid #c4b8a8;
+            border-radius: 3px;
+            padding: 32px 28px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            font-family: 'STSong', serif;
+            position: relative;
+        }
+        .modal-content h3 {
+            text-align: center;
+            font-size: 20px;
+            letter-spacing: 4px;
+            color: #2c1a0f;
+            margin-bottom: 20px;
+        }
+        .modal-content label { display: block; font-size: 13px; color: #4a3020; margin-bottom: 4px; }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 16px;
+            border: 1px solid #c4b8a8;
+            border-radius: 2px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fffef9;
+        }
+        .date-select-group { display: flex; gap: 10px; margin-bottom: 16px; }
+        .date-select-group select { flex: 1; padding: 8px; }
+        .modal-close {
+            position: absolute;
+            top: 8px; right: 12px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8b6b5b;
+            background: none;
+            border: none;
+        }
+        .modal-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--gold);
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            font-size: 15px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            font-family: 'STSong', serif;
+        }
+        .modal-submit:hover { background: var(--gold-dark); }
+        .modal-message { text-align: center; margin-top: 10px; font-size: 13px; color: #8b1a1a; letter-spacing: 1px; }
+
+        .footer {
+            background: var(--navy);
+            color: #9b8b70;
+            text-align: center;
+            padding: 30px 24px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            margin-top: 40px;
+            font-family: 'STSong', serif;
+        }
+        .footer a { color: #c4b998; text-decoration: none; font-size: 10px; }
+        .room-desc { font-size: 12px; color: var(--text-light); font-family: 'STSong', serif; }
+
+        @media (max-width: 768px) {
+            .navbar-inner { flex-wrap: wrap; height: auto; padding: 12px 16px; }
+            .nav-links { gap: 12px; flex-wrap: wrap; }
+            .hall-grid, .room-grid, .dining-grid { grid-template-columns: 1fr; }
+            .hero-img { height: 240px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <span>📞 预订热线：<span id="topPhone">400-888-6362</span></span>
+        <span>📍 明安市溪燕区繁花大道20号</span>
+    </div>
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <span class="logo" onclick="showPage('home')"><span class="moon">☽</span>昭月大酒店</span>
+            <ul class="nav-links">
+                <li><a onclick="showPage('halls')" class="nav-link">宴会厅</a></li>
+                <li><a onclick="showPage('rooms')" class="nav-link">客房</a></li>
+                <li><a onclick="showPage('dining')" class="nav-link">餐饮</a></li>
+                <li><a onclick="showPage('about')" class="nav-link">关于</a></li>
+                <li><a onclick="showPage('contact')" class="nav-link">联系</a></li>
+                <li><a onclick="showPage('book')" class="btn-book nav-link">在线预订</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 首页 -->
+    <div id="home" class="page-section active">
+        <img src="hotel_exterior.jpg" alt="昭月大酒店外观" class="hero-img">
+        <div style="text-align:center; margin-top:30px;">
+            <p style="color:var(--text-light); letter-spacing:2px; font-size:15px; font-family:'STSong',serif;">月照人心，宾至如归</p>
+        </div>
+    </div>
+
+    <!-- 宴会厅 -->
+    <div id="halls" class="page-section">
+        <h2 class="section-title">宴 会 厅</h2>
+        <p class="section-subtitle">—— 承办婚宴 · 寿宴 · 商务会议 ——</p>
+        <div class="section-divider"></div>
+
+        <div class="invitation-notice">
+            ※ 参加昭月大酒店宴席需出示电子邀请函，请提前申领。
+        </div>
+        <div style="text-align:center;">
+            <button class="btn-get-invite" onclick="openInviteModal()">📜 获取邀请函</button>
+        </div>
+
+        <div class="hall-grid" style="margin-top:20px;">
+            <div class="hall-card">
+                <div class="hall-img"><img src="myt.jpg" alt="明月厅" class="hall-img-real"></div>
+                <div class="hall-info">
+                    <div class="hall-name">明月厅</div>
+                    <div class="hall-capacity">容纳人数：30桌 · 面积：680㎡</div>
+                    <span class="hall-status status-available">可预订</span><br>
+                    <a class="hall-btn btn-available" onclick="showPage('book')">预订咨询</a>
+                </div>
+            </div>
+            <div class="hall-card">
+                <div class="hall-img"><img src="wst.jpg" alt="望舒厅" class="hall-img-real"></div>
+                <div class="hall-info">
+                    <div class="hall-name">望舒厅</div>
+                    <div class="hall-capacity">容纳人数：20桌 · 面积：450㎡</div>
+                    <span class="hall-status status-available">可预订</span><br>
+                    <a class="hall-btn btn-available" onclick="showPage('book')">预订咨询</a>
+                </div>
+            </div>
+            <div class="hall-card">
+                <div class="hall-img"><img src="qlt.jpg" alt="琼楼厅" class="hall-img-real"></div>
+                <div class="hall-info">
+                    <div class="hall-name">琼楼厅</div>
+                    <div class="hall-capacity">容纳人数：15桌 · 面积：320㎡</div>
+                    <span class="hall-status status-available">可预订</span><br>
+                    <a class="hall-btn btn-available" onclick="showPage('book')">预订咨询</a>
+                </div>
+            </div>
+            <div class="hall-card special-hall" id="blocked-hall">
+                <div class="hall-img">
+                    <img src="bbt.jpg" alt="■■厅" class="hall-img-real" id="bbtImg">
+                </div>
+                <div class="hall-info">
+                    <div class="hall-name">■■ 厅</div>
+                    <div class="hall-capacity">容纳人数：—— · 面积：——</div>
+                    <span class="hall-status status-booked">已预订 · 私人活动</span>
+                    <div class="hall-status-extra">预订人：柳女士 · 农历七月十四</div>
+                    <br>
+                    <span class="hall-btn btn-disabled" id="btnDisabled">暂不可订</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 客房 -->
+    <div id="rooms" class="page-section">
+        <h2 class="section-title">客 房</h2>
+        <p class="section-subtitle">—— 中式雅致 · 静谧舒眠 ——</p>
+        <div class="section-divider"></div>
+        <div class="room-grid">
+            <div class="room-card">
+                <div class="room-img"><img src="hhtf.jpg" alt="豪华套房" class="room-img-real"></div>
+                <div class="room-info"><div class="room-name">豪华套房</div><div class="room-desc">60㎡ · 独立客厅 · 月景阳台</div></div>
+            </div>
+            <div class="room-card">
+                <div class="room-img"><img src="xzkf.jpg" alt="行政客房" class="room-img-real"></div>
+                <div class="room-info"><div class="room-name">行政客房</div><div class="room-desc">38㎡ · 办公区域 · 高速网络</div></div>
+            </div>
+            <div class="room-card">
+                <div class="room-img"><img src="bzkf.jpg" alt="标准客房" class="room-img-real"></div>
+                <div class="room-info"><div class="room-name">标准客房</div><div class="room-desc">28㎡ · 舒适大床 · 庭院景观</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 餐饮 -->
+    <div id="dining" class="page-section">
+        <h2 class="section-title">餐 饮</h2>
+        <p class="section-subtitle">—— 地道本帮菜 · 私房料理 ——</p>
+        <div class="section-divider"></div>
+        <div class="room-grid">
+            <div class="room-card">
+                <div class="room-img"><img src="zyct.jpg" alt="昭月中餐厅" class="room-img-real"></div>
+                <div class="room-info"><div class="room-name">昭月中餐厅</div><div class="room-desc">主打传统本帮菜，设包间10间</div></div>
+            </div>
+            <div class="room-card">
+                <div class="room-img"><img src="yhkf.jpg" alt="月华咖啡厅" class="room-img-real"></div>
+                <div class="room-info"><div class="room-name">月华咖啡厅</div><div class="room-desc">全天候供应中西简餐及下午茶</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于我们 -->
+    <div id="about" class="page-section">
+        <h2 class="section-title">关 于 昭 月</h2>
+        <div class="section-divider"></div>
+        <div class="about-block">
+            <p>昭月大酒店坐落于<span class="highlight">明安市溪燕区繁花大道20号</span>，地处城市文化脉络的核心地带，毗邻溪燕河畔，环境清幽，交通便利。酒店于<span class="highlight">2003年</span>正式开业，至今已有二十余载历史，是本地知名的老牌高端酒店之一。</p>
+            <p>酒店以“<span class="highlight">月照人心，宾至如归</span>”为经营理念，始终致力于将传统中式美学与现代服务理念相结合。酒店整体设计采用新中式风格，大堂内高悬手工打造的铜质月相灯，客房走廊以月相变化为装饰主题，处处彰显着东方文化的静谧与雅致。</p>
+            <p>昭月大酒店拥有四间多功能宴会厅，可承办婚宴、寿宴、商务会议及各类庆典活动。其中明月厅、望舒厅、琼楼厅均配备先进的多媒体设备与专业宴会服务团队，能够满足不同规模和需求的宴请场合。酒店还设有百余间雅致客房，涵盖豪华套房、行政客房及标准客房等多种房型，所有房间均采用隔音设计，配备高档床品与智能卫浴系统，为宾客提供极致的居住体验。</p>
+            <p>在餐饮方面，酒店内的昭月中餐厅以地道本帮菜见长，由资深主厨团队掌勺，严选当季新鲜食材，为食客呈现经典与创新并蓄的私房料理。月华咖啡厅则提供全天候中西简餐及精致下午茶，是商务会晤与休闲小憩的理想之选。</p>
+            <p>多年来，昭月大酒店凭借卓越的服务与优质的口碑，赢得了社会各界的广泛认可。无论是家庭聚会、商务出行还是浪漫婚典，我们都力求为每一位宾客留下温馨而难忘的回忆。昭月大酒店，期待您的光临。</p>
+            <p class="revision">昭月大酒店管理部 · 2024年修订</p>
+        </div>
+    </div>
+
+    <!-- 联系我们 -->
+    <div id="contact" class="page-section">
+        <h2 class="section-title">联 系 我 们</h2>
+        <div class="section-divider"></div>
+        <div class="contact-block">
+            <p>📍 地址：明安市溪燕区繁花大道20号</p>
+            <p>📞 电话：<span id="contactPhone">400-888-6362</span></p>
+            <p>📧 邮箱：info@zhaoyue-hotel.com</p>
+        </div>
+    </div>
+
+    <!-- 在线预订 -->
+    <div id="book" class="page-section">
+        <h2 class="section-title">在 线 预 订</h2>
+        <div class="section-divider"></div>
+        <form class="book-form" onsubmit="handleBookSubmit(event)" id="bookForm">
+            <label>姓名</label>
+            <input type="text" placeholder="请输入您的姓名">
+            <label>电话</label>
+            <input type="tel" placeholder="请输入联系电话">
+            <label>预订类型</label>
+            <select>
+                <option>宴会厅</option>
+                <option>客房</option>
+                <option>餐饮</option>
+            </select>
+            <label>备注</label>
+            <textarea rows="3" placeholder="如有特殊需求请留言"></textarea>
+            <button type="submit">提交预订</button>
+            <p class="book-message" id="bookMessage"></p>
+        </form>
+    </div>
+
+    <!-- 邀请函模态框 -->
+    <div class="modal-overlay" id="inviteModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeInviteModal()">✕</button>
+            <h3>申 领 邀 请 函</h3>
+            <label>姓 名</label>
+            <input type="text" id="inviteName" placeholder="请输入您的姓名" autocomplete="off">
+
+            <label>宴会日期</label>
+            <div class="date-select-group">
+                <select id="inviteYear">
+                    <option value="2026">2026年</option>
+                    <option value="2027">2027年</option>
+                </select>
+                <select id="inviteMonth">
+                    <option value="1" selected>1月</option><option value="2">2月</option><option value="3">3月</option><option value="4">4月</option>
+                    <option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option>
+                    <option value="9">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+                <select id="inviteDay">
+                    <option value="1" selected>1日</option><option value="2">2日</option><option value="3">3日</option><option value="4">4日</option>
+                    <option value="5">5日</option><option value="6">6日</option><option value="7">7日</option><option value="8">8日</option>
+                    <option value="9">9日</option><option value="10">10日</option><option value="11">11日</option><option value="12">12日</option>
+                    <option value="13">13日</option><option value="14">14日</option><option value="15">15日</option><option value="16">16日</option>
+                    <option value="17">17日</option><option value="18">18日</option><option value="19">19日</option><option value="20">20日</option>
+                    <option value="21">21日</option><option value="22">22日</option><option value="23">23日</option><option value="24">24日</option>
+                    <option value="25">25日</option><option value="26">26日</option><option value="27">27日</option><option value="28">28日</option><option value="29">29日</option><option value="30">30日</option><option value="31">31日</option>
+                </select>
+            </div>
+
+            <label>宴会厅</label>
+            <select id="inviteHall">
+                <option value="明月厅">明月厅</option>
+                <option value="望舒厅">望舒厅</option>
+                <option value="琼楼厅">琼楼厅</option>
+                <option value="■■厅" style="color:#8b1a1a;">■■厅</option>
+            </select>
+
+            <button class="modal-submit" onclick="submitInvite()">提 交 申 请</button>
+            <div class="modal-message" id="inviteMessage"></div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p style="margin-bottom:6px;">📍 地址：明安市溪燕区繁花大道20号</p>
+        <p style="margin-bottom:6px;">📞 电话：<span id="footerPhone">400-888-6362</span></p>
+        <p style="margin-bottom:6px;">📧 邮箱：info@zhaoyue-hotel.com</p>
+        <p style="font-size:9px; opacity:0.7; margin-top:8px;">© 2024 昭月大酒店</p>
+        <p style="font-size:9px; opacity:0.5;">—— 月照人心，宾至如归 ——</p>
+    </footer>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const links = document.querySelectorAll('.nav-links a');
+            links.forEach(link => {
+                if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(`'${pageId}'`)) {
+                    link.classList.add('active');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updatePhonesToWang() {
+            document.getElementById('topPhone').textContent = '14827168464 王经理';
+            document.getElementById('contactPhone').textContent = '14827168464 王经理';
+            document.getElementById('footerPhone').textContent = '14827168464 王经理';
+        }
+
+        function switchBbtImage() {
+            const bbtImg = document.getElementById('bbtImg');
+            if (bbtImg && bbtImg.src.indexOf('bbt1.jpg') === -1) {
+                bbtImg.src = 'bbt1.jpg';
+                updatePhonesToWang();
+            }
+        }
+
+        const bbtImg = document.getElementById('bbtImg');
+        let clickCount = 0;
+        let clickTimer = null;
+        if (bbtImg) {
+            bbtImg.addEventListener('click', function(e) {
+                e.stopPropagation();
+                clickCount++;
+                if (clickTimer) clearTimeout(clickTimer);
+                clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
+                if (clickCount === 2) {
+                    switchBbtImage();
+                    clickCount = 0;
+                    if (clickTimer) clearTimeout(clickTimer);
+                }
+            });
+        }
+
+        const btnDisabled = document.getElementById('btnDisabled');
+        if (btnDisabled) {
+            btnDisabled.addEventListener('click', function(e) {
+                e.stopPropagation();
+                switchBbtImage();
+            });
+        }
+
+        function openInviteModal() {
+            document.getElementById('inviteModal').classList.add('show');
+            document.getElementById('inviteName').value = '';
+            document.getElementById('inviteYear').value = '2026';
+            document.getElementById('inviteMonth').value = '1';
+            document.getElementById('inviteDay').value = '1';
+            document.getElementById('inviteHall').value = '明月厅';
+            document.getElementById('inviteHall').disabled = false;
+            document.getElementById('inviteHall').style.background = '';
+            document.getElementById('inviteMessage').textContent = '';
+        }
+
+        function closeInviteModal() {
+            document.getElementById('inviteModal').classList.remove('show');
+        }
+
+        const inviteNameInput = document.getElementById('inviteName');
+        const inviteYear = document.getElementById('inviteYear');
+        const inviteMonth = document.getElementById('inviteMonth');
+        const inviteDay = document.getElementById('inviteDay');
+        const inviteHall = document.getElementById('inviteHall');
+
+        function checkAutoFill() {
+            const name = inviteNameInput.value.trim();
+            const year = inviteYear.value;
+            const month = inviteMonth.value;
+            const day = inviteDay.value;
+            if (name === '柳吟' && year === '2026' && month === '8' && day === '26') {
+                inviteHall.value = '■■厅';
+                inviteHall.disabled = true;
+                inviteHall.style.background = '#fdf2f2';
+            } else {
+                inviteHall.disabled = false;
+                inviteHall.style.background = '';
+                if (inviteHall.value === '■■厅') {
+                    inviteHall.value = '明月厅';
+                }
+            }
+        }
+
+        inviteNameInput.addEventListener('input', checkAutoFill);
+        inviteYear.addEventListener('change', checkAutoFill);
+        inviteMonth.addEventListener('change', checkAutoFill);
+        inviteDay.addEventListener('change', checkAutoFill);
+
+        function submitInvite() {
+            const name = inviteNameInput.value.trim();
+            const year = inviteYear.value;
+            const month = inviteMonth.value;
+            const day = inviteDay.value;
+            const hall = inviteHall.value;
+            const msg = document.getElementById('inviteMessage');
+
+            // 条件：姓名=柳吟，日期=2026年8月26日，厅位=■■厅
+            if (name === '柳吟' && year === '2026' && month === '8' && day === '26' && hall === '■■厅') {
+                window.location.href = 'https://jiehunheka.netlify.app';
+            } else {
+                msg.textContent = '没有此邀请';
+                msg.style.color = '#8b1a1a';
+            }
+        }
+
+        function handleBookSubmit(e) {
+            e.preventDefault();
+            document.getElementById('bookMessage').textContent = '预订成功，稍后将收到短信提示';
+        }
+
+        showPage('home');
+    </script>
+</body>
+</html>
